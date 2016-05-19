@@ -28,6 +28,7 @@
   "homepage": "https://github.com/toyamarinyon/kickstart_phantomjs",
   "devDependencies": {
     "babel-cli": "^6.8.0",
+    "babel-polyfill": "^6.9.0",
     "babel-preset-es2015": "^6.6.0",
     "eslint": "^2.9.0",
     "eslint-config-airbnb": "^9.0.1",

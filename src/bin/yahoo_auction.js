@@ -1,3 +1,4 @@
+import 'babel-polyfill';
 import webpage from 'webpage';
 
 const page = webpage.create();
@@ -16,26 +17,41 @@ page.onError = (message, trace) => {
 };
 page.viewportSize = { width: 1000, height: 800 };
 
-page.open('https://auctions.yahoo.co.jp/', (status) => {
-  page.includeJs('https://ajax.googleapis.com/ajax/libs/jquery/2.0.0/jquery.js', () => {
-    const loginButton = page.evaluate(() => {
-      const $loginButton = $('#masthead > div > div.yjmthloginarea > p:nth-child(1) > strong > a');
-      const x = $loginButton.offset().top + $loginButton.width()/ 2;
-      const y = $loginButton.offset().left + $loginButton.height() / 2;
-      return { x, y };
+const clickLoginAnchor = () => {
+  return new Promise((resolve, reject) => {
+    page.includeJs('https://ajax.googleapis.com/ajax/libs/jquery/2.0.0/jquery.js', () => {
+      page.onLoadFinished = () => {
+        page.onLoadFinished = null;
+        page.render('/var/share/login.jpg', { format: 'jpeg', quality: '100' });
+        return resolve();
+      };
+      page.evaluate(() => {
+        $('a:contains("出品中")').get(0).click();
+      });
     });
-    console.log('onLoadFinished');
-    page.onLoadFinished = () => {
-      console.log('pageLoad');
-      page.onLoadFinished = null;
-      console.log(page);
-    };
-    console.log('onLoadFinished');
-    page.evaluate(() => {
-      const $loginButton = $('#masthead > div > div.yjmthloginarea > p:nth-child(1) > strong > a');
-      $loginButton.get(0).click();
-    });
-    page.sendEvent('click', loginButton.x, loginButton.y);
   });
+};
+
+const login = () => {
+  return new Promise((resolve, reject) => {
+    page.includeJs('https://ajax.googleapis.com/ajax/libs/jquery/2.0.0/jquery.js', () => {
+      page.onLoadFinished = () => {
+        page.onLoadFinished = null;
+        page.render('/var/share/login_finish.jpg', { format: 'jpeg', quality: '100' });
+        return resolve();
+      };
+      page.evaluate(() => {
+        $('#username').val('');
+        $('#passwd').val('');
+        $('.btnLogin.yjM').get(0).click();
+      });
+    });
+  });
+};
+
+page.open('https://auctions.yahoo.co.jp/', (status) => {
+  clickLoginAnchor()
+    .then(() => login())
+    .then(() => phantom.exit());
 });
 
