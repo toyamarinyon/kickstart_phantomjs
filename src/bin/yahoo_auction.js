@@ -1,11 +1,6 @@
 import webpage from 'webpage';
 
 const page = webpage.create();
-const findCenterCoordinate = ($element) => {
-  const x = $element.offset().x + $element.width / 2;
-  const y = $element.offset().y + $element.height / 2;
-  return { x, y };
-};
 
 page.onConsoleMessage = (message) => console.log(message);
 page.onError = (message, trace) => {
@@ -23,17 +18,24 @@ page.viewportSize = { width: 1000, height: 800 };
 
 page.open('https://auctions.yahoo.co.jp/', (status) => {
   page.includeJs('https://ajax.googleapis.com/ajax/libs/jquery/2.0.0/jquery.js', () => {
-    const $loginButton = page.evaluate(() => {
-      return $('#masthead > div > div.yjmthloginarea > p:nth-child(1) > strong > a');
+    const loginButton = page.evaluate(() => {
+      const $loginButton = $('#masthead > div > div.yjmthloginarea > p:nth-child(1) > strong > a');
+      const x = $loginButton.offset().top + $loginButton.width()/ 2;
+      const y = $loginButton.offset().left + $loginButton.height() / 2;
+      return { x, y };
     });
-    const loginButton = findCenterCoordinate($loginButton);
-    console.log('hello!3');
-    page.onLoadFinished(() => {
+    console.log('onLoadFinished');
+    page.onLoadFinished = () => {
       console.log('pageLoad');
       page.onLoadFinished = null;
       console.log(page);
+    };
+    console.log('onLoadFinished');
+    page.evaluate(() => {
+      const $loginButton = $('#masthead > div > div.yjmthloginarea > p:nth-child(1) > strong > a');
+      $loginButton.get(0).click();
     });
     page.sendEvent('click', loginButton.x, loginButton.y);
   });
-})
+});
 
